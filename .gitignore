@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+AGENTS.md
 /.pnp
 .pnp.*
 .yarn/*
@@ -33,8 +34,19 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+*.md
+!README.md
+
+docs/
+
+.opencode/
+reference/
+
+
+
 # vercel
 .vercel
+
 
 # typescript
 *.tsbuildinfo
