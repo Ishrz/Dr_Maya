@@ -21,8 +21,11 @@
   --color-line: #ddd3c1; /* hairlines and borders */
   --color-inverse: #f6f2e9; /* text on primary / dark panels */
 
-  /* Type scale (desktop -> mobile) */
-  --text-display: clamp(2.5rem, 1.4rem + 4.4vw, 4.25rem);
+  /* Type scale (desktop -> mobile).
+     The display size is also capped against the viewport height so the hero
+     heading shrinks on short laptop screens instead of pushing the CTAs
+     below the fold. */
+  --text-display: clamp(2.1rem, min(1.15rem + 3.5vw, 7.6dvh), 3.6rem);
   --text-display--line-height: 1.02;
   --text-display--letter-spacing: -0.02em;
   --text-h2: clamp(1.9rem, 1.2rem + 2.6vw, 3rem);
@@ -40,6 +43,7 @@
   /* Layout */
   --container-site: 82rem; /* standard content width */
   --container-wide: 96rem; /* for full-bleed-image sections */
+  --header-h: 4.5rem; /* fixed header height — the hero measures against it */
 
   /* Shape */
   --radius-card: 1.125rem;
@@ -61,18 +65,20 @@
 @layer base {
   :root {
     --gutter: 1.5rem;
+    --header-h: 4.25rem;
   }
 
   @media (min-width: 768px) {
     :root {
       --gutter: 2.5rem;
+      --header-h: 5rem;
     }
   }
 
   html {
     scroll-behavior: smooth;
     /* sticky header height + breathing room for in-page anchors */
-    scroll-padding-top: 6.5rem;
+    scroll-padding-top: calc(var(--header-h) + 1.5rem);
   }
 
   body {

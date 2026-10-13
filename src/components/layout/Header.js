@@ -46,7 +46,7 @@ export default function Header() {
           : "border-b border-transparent bg-bg"
       }`}
     >
-      <Container className="flex items-center justify-between gap-6 py-5 md:py-6">
+      <Container className="flex h-[var(--header-h)] items-center justify-between gap-6">
         <Link href="#top" className="group flex items-baseline gap-2.5 no-underline">
           <span className="font-display text-[1.35rem] leading-none tracking-tight text-ink md:text-[1.6rem]">
             {nav.logo.name}
