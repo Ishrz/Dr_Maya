@@ -1,26 +1,377 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ---------------------------------------------------------------------------
+   Design tokens — "Coastal Clay"
+   Calm, grounded, warm. Swap these values to retheme the whole site;
+   components never hard-code a colour, font or radius.
+   See docs/03-design-system.md
+--------------------------------------------------------------------------- */
+@theme {
+  /* Palette */
+  --color-bg: #fbf8f2; /* soft linen — page background */
+  --color-surface: #efe6d6; /* warm sand — alternate sections */
+  --color-surface-deep: #e6dac4; /* sand, one step darker for nesting */
+  --color-primary: #1f4a4c; /* deep sea-pine */
+  --color-primary-dark: #163638;
+  --color-primary-soft: #38636a; /* hover / muted primary text */
+  --color-accent: #b4532f; /* clay — key CTAs and small highlights */
+  --color-accent-soft: #97502f;
+  --color-ink: #1e2a2b; /* body text */
+  --color-muted: #546465; /* secondary text */
+  --color-line: #ddd3c1; /* hairlines and borders */
+  --color-inverse: #f6f2e9; /* text on primary / dark panels */
+
+  /* Type scale (desktop -> mobile) */
+  --text-display: clamp(2.5rem, 1.4rem + 4.4vw, 4.25rem);
+  --text-display--line-height: 1.02;
+  --text-display--letter-spacing: -0.02em;
+  --text-h2: clamp(1.9rem, 1.2rem + 2.6vw, 3rem);
+  --text-h2--line-height: 1.08;
+  --text-h2--letter-spacing: -0.015em;
+  --text-h3: clamp(1.5rem, 1.2rem + 1.1vw, 2rem);
+  --text-h3--line-height: 1.18;
+  --text-h3--letter-spacing: -0.01em;
+  --text-h4: clamp(1.2rem, 1.08rem + 0.5vw, 1.4rem);
+  --text-h4--line-height: 1.25;
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.75;
+  --text-small: 0.875rem;
+
+  /* Layout */
+  --container-site: 82rem; /* standard content width */
+  --container-wide: 96rem; /* for full-bleed-image sections */
+
+  /* Shape */
+  --radius-card: 1.125rem;
+  --radius-pill: 999px;
+
+  /* Motion */
+  --ease-out-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
+/* Fonts are injected by next/font on <html>, so inline them: the utility must
+   reference the runtime variable directly rather than a copied value. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-body: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
+/* --------------------------------------------------------------------------- */
+
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --gutter: 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    :root {
+      --gutter: 2.5rem;
+    }
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* sticky header height + breathing room for in-page anchors */
+    scroll-padding-top: 6.5rem;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    text-wrap: balance;
+  }
+
+  /* Every heading gets the optical size + soft axes Fraunces needs */
+  h1,
+  h2 {
+    font-variation-settings: "SOFT" 20, "WONK" 1;
+  }
+
+  h3,
+  h4 {
+    font-variation-settings: "SOFT" 10;
+  }
+
+  /* A single visible focus treatment everywhere */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-primary);
+    color: var(--color-inverse);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  /* --- Links ---------------------------------------------------------------
+     The reference site wipes a hairline out from under a link on hover.
+     We keep that gesture; it is the signature interaction of the layout. */
+  .link-wipe {
+    position: relative;
+    display: inline-block;
+    text-decoration: none;
+  }
+
+  .link-wipe::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.15em;
+    height: 1px;
+    background-color: currentColor;
+    transform-origin: right center;
+    transition: transform 0.4s var(--ease-out-soft);
+  }
+
+  .link-wipe:hover::after,
+  .link-wipe:focus-visible::after {
+    transform: scaleX(0);
+  }
+
+  .link-underline {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+    transition: color 0.2s var(--ease-out-soft);
+  }
+
+  .link-underline:hover {
+    color: var(--color-accent);
+  }
+
+  /* --- Buttons ------------------------------------------------------------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    min-height: 2.875rem; /* 46px — comfortable tap target */
+    padding: 0.75rem 1.75rem;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-body);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition:
+      background-color 0.25s var(--ease-out-soft),
+      color 0.25s var(--ease-out-soft),
+      border-color 0.25s var(--ease-out-soft);
+  }
+
+  .btn-primary {
+    background-color: var(--color-primary);
+    color: var(--color-inverse);
+    border: 1px solid var(--color-primary);
+  }
+
+  .btn-primary:hover {
+    background-color: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+  }
+
+  .btn-accent {
+    background-color: var(--color-accent);
+    color: #fdf8f3;
+    border: 1px solid var(--color-accent);
+  }
+
+  .btn-accent:hover {
+    background-color: var(--color-accent-soft);
+    border-color: var(--color-accent-soft);
+  }
+
+  .btn-outline {
+    background-color: transparent;
+    color: var(--color-ink);
+    border: 1px solid color-mix(in srgb, var(--color-ink) 45%, transparent);
+  }
+
+  .btn-outline:hover {
+    background-color: var(--color-ink);
+    color: var(--color-bg);
+    border-color: var(--color-ink);
+  }
+
+  /* On dark panels the outline flips to light */
+  .btn-outline-light {
+    background-color: transparent;
+    color: var(--color-inverse);
+    border: 1px solid color-mix(in srgb, var(--color-inverse) 55%, transparent);
+  }
+
+  .btn-outline-light:hover {
+    background-color: var(--color-inverse);
+    color: var(--color-primary);
+  }
+
+  /* Editorial text button, mirroring the reference's primary button style */
+  .btn-editorial {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 2.75rem;
+    padding: 0.25rem 0;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-ink);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+  }
+
+  .btn-editorial::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background-color: currentColor;
+    transition: transform 0.5s var(--ease-out-soft);
+    transform-origin: right center;
+  }
+
+  .btn-editorial {
+    position: relative;
+  }
+
+  .btn-editorial:hover::after,
+  .btn-editorial:focus-visible::after {
+    transform: scaleX(0);
+  }
+
+  /* --- Small caps eyebrow -------------------------------------------------- */
+  .eyebrow {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+
+  /* --- Imagery -------------------------------------------------------------
+     One warm, slightly desaturated treatment so mixed sources read as a set.
+     The tint is a plain alpha overlay rather than mix-blend-mode: blending is
+     unreliable against filtered images and the flat result reads as grey. */
+  .img-warm {
+    filter: sepia(0.14) saturate(0.85) contrast(0.96) brightness(1.04);
+  }
+
+  .img-tint {
+    position: absolute;
+    inset: 0;
+    background-color: color-mix(in srgb, var(--color-primary) 10%, transparent);
+    pointer-events: none;
+  }
+
+  /* --- FAQ accordion ------------------------------------------------------- */
+  .accordion-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.32s var(--ease-out-soft);
+  }
+
+  .accordion-panel[data-open="true"] {
+    grid-template-rows: 1fr;
+  }
+
+  .accordion-panel > div {
+    overflow: hidden;
+  }
+
+  .accordion-panel p {
+    opacity: 0;
+    transition: opacity 0.28s var(--ease-out-soft);
+  }
+
+  .accordion-panel[data-open="true"] p {
+    opacity: 1;
+    transition-delay: 0.08s;
+  }
+}
+
+@layer utilities {
+  /* Horizontal gutter — the reference site uses a proportional 5vw gutter;
+     we hold a fixed one so it matches the container maths below. */
+  .gutter-x {
+    padding-inline: var(--gutter);
+  }
+
+  /* Distance from the container edge to the viewport edge, so an image can
+     run full-bleed while its sibling stays inside the container. */
+  .bleed-right {
+    margin-right: calc(-1 * ((100% - min(100%, var(--container-site))) / 2 + var(--gutter)));
+  }
+
+  .bleed-left {
+    margin-left: calc(-1 * ((100% - min(100%, var(--container-site))) / 2 + var(--gutter)));
+  }
+
+  .bleed-x {
+    margin-inline: calc(-1 * ((100% - min(100%, var(--container-site))) / 2 + var(--gutter)));
+  }
+
+  /* Scroll reveal — the observer toggles data-revealed on the element. */
+  .reveal {
+    opacity: 0;
+    transform: translateY(14px);
+    transition:
+      opacity 0.6s var(--ease-out-soft),
+      transform 0.6s var(--ease-out-soft);
+  }
+
+  .reveal[data-revealed="true"] {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Hairline that fades in from one side */
+  .rule-fade {
+    background-image: linear-gradient(
+      to right,
+      var(--color-line) 0%,
+      color-mix(in srgb, var(--color-line) 0%, transparent) 100%
+    );
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
 }
